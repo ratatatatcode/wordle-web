@@ -38,13 +38,6 @@ function App() {
   const checkAnswer = () => {
     const newBoxes = [...boxes];
     const updateRow = [...newBoxes[rowToCheckRef.current]];
-
-    // Fix: Uncaught TypeError: newBoxes[nextRowToCheck] is not iterable
-    let nextRowToCheck =
-      rowToCheckRef.current < 5 ? rowToCheckRef.current + 1 : rowToCheckRef.current;
-    const updateSecondRow = [...newBoxes[nextRowToCheck]];
-    console.log(`Current: ${rowToCheckRef.current} | Next: ${nextRowToCheck}`);
-
     let correctLetterCount = 0;
     let tryCount = 0;
 
@@ -66,14 +59,20 @@ function App() {
     }
 
     if (correctLetterCount === 5 && tryCount <= 5) {
+      tryCount = 0;
       setGameState("win");
     }
 
     if (gameState !== "win") {
       updateRow[5] = "checked";
       newBoxes[rowToCheckRef.current] = updateRow;
-      updateSecondRow[5] = "open";
-      newBoxes[nextRowToCheck] = updateSecondRow;
+
+      if (rowToCheckRef.current + 1 !== 5) {
+        const nextRowToCheck = rowToCheckRef.current + 1;
+        const updateSecondRow = [...newBoxes[nextRowToCheck]];
+        updateSecondRow[5] = "open";
+        newBoxes[nextRowToCheck] = updateSecondRow;
+      }
       correctLetterCount = 0;
 
       rowToCheckRef.current++;
@@ -120,6 +119,8 @@ function App() {
       <button className="mt-[10px]" onClick={checkAnswer}>
         Enter
       </button>
+
+      {/* Add: New Game Button */}
     </div>
   );
 }
