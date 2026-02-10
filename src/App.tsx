@@ -3,10 +3,12 @@ import "./App.css";
 
 function App() {
   const apiURL = "https://random-word-api.herokuapp.com/word?length=5";
-  // Default for now: JAMES
+  // Set default for testing if the API is not working.
   const [hiddenWord, setHiddenWord] = useState("");
   const rowToCheckRef: RefObject<number> = useRef(0);
   const [currentAnswer, setCurrentAnswer] = useState<string[]>([]);
+
+  // Update: Game State - win/lose. (Button to start or restart the game.)
   const [gameState, setGameState] = useState("idle");
   // const [currentStatus, setCurrentStatus] = useState<string[]>([]);
 
@@ -36,6 +38,8 @@ function App() {
   const checkAnswer = () => {
     const newBoxes = [...boxes];
     const updateRow = [...newBoxes[rowToCheckRef.current]];
+
+    // Fix: Uncaught TypeError: newBoxes[nextRowToCheck] is not iterable
     let nextRowToCheck =
       rowToCheckRef.current < 5 ? rowToCheckRef.current + 1 : rowToCheckRef.current;
     const updateSecondRow = [...newBoxes[nextRowToCheck]];
