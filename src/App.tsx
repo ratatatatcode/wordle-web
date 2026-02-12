@@ -4,9 +4,11 @@ import "./App.css";
 function App() {
   const apiURL = "https://random-word-api.herokuapp.com/word?length=5";
   // Set default for testing if the API is not working.
+  const maxRows = 6;
   const [hiddenWord, setHiddenWord] = useState("");
   const rowToCheckRef: RefObject<number> = useRef(0);
   const [currentAnswer, setCurrentAnswer] = useState<string[]>([]);
+  const [tryCount, setTryCount] = useState(1);
 
   // Update: Game State - win/lose. (Button to start or restart the game.)
   const [gameState, setGameState] = useState("idle");
@@ -14,6 +16,7 @@ function App() {
 
   const [boxes, setBoxes] = useState<string[][]>([
     ["empty", "empty", "empty", "empty", "empty", "open"],
+    ["empty", "empty", "empty", "empty", "empty", "unchecked"],
     ["empty", "empty", "empty", "empty", "empty", "unchecked"],
     ["empty", "empty", "empty", "empty", "empty", "unchecked"],
     ["empty", "empty", "empty", "empty", "empty", "unchecked"],
@@ -39,9 +42,8 @@ function App() {
     const newBoxes = [...boxes];
     const updateRow = [...newBoxes[rowToCheckRef.current]];
     let correctLetterCount = 0;
-    let tryCount = 0;
 
-    if (tryCount <= 5) {
+    if (tryCount <= maxRows) {
       boxes[rowToCheckRef.current]
         .filter((w) => w !== "open" && w !== "checked" && w !== "unchecked")
         .forEach((_, idx) => {
@@ -53,21 +55,31 @@ function App() {
           } else {
             updateRow[idx] = "incorrect";
           }
-
-          tryCount++;
         });
+
+      setTryCount((c) => c + 1);
     }
 
-    if (correctLetterCount === 5 && tryCount <= 5) {
-      tryCount = 0;
+    if (correctLetterCount === 5 && tryCount <= maxRows) {
+      console.log("Working: Win");
+      setTryCount(0);
       setGameState("win");
+      // Update: return(?), update arr status (green display)
     }
 
-    if (gameState !== "win") {
+    console.log(`Try Count (outside): ${tryCount}`);
+    if (tryCount === maxRows) {
+      console.log(`Try Count: ${tryCount}`);
+      console.log("Working: Lose");
+      setTryCount(0);
+      setGameState("lose");
+    }
+
+    if (gameState !== "win" && gameState !== "lose") {
       updateRow[5] = "checked";
       newBoxes[rowToCheckRef.current] = updateRow;
 
-      if (rowToCheckRef.current + 1 !== 5) {
+      if (rowToCheckRef.current + 1 !== maxRows) {
         const nextRowToCheck = rowToCheckRef.current + 1;
         const updateSecondRow = [...newBoxes[nextRowToCheck]];
         updateSecondRow[5] = "open";
@@ -85,7 +97,7 @@ function App() {
     <div className="flex min-h-screen w-full flex-col items-center justify-center">
       <div className="flex flex-col items-center justify-center">
         <h1 className="text-blue-500">WORDLE</h1>
-        <h2>Hidden Word: {hiddenWord}</h2>
+        {/* <h2>Hidden Word: {hiddenWord}</h2> */}
       </div>
       <div className="flex flex-col gap-[4px]">
         {boxes.map((_, idx) => (
@@ -108,6 +120,11 @@ function App() {
                     /* const newCurrentAnswer = [...currentAnswer];
                     newCurrentAnswer[idx] = e.target.value;
                     setCurrentAnswer(newCurrentAnswer); */
+
+                    /* Update/Fix:
+                    Adding extra element when spamming letters.
+                    Remove previous letter when clicking backspace.
+                     */
                     setCurrentAnswer((prev) => [...prev, e.target.value]);
                   }}
                 />
@@ -116,7 +133,12 @@ function App() {
         ))}
       </div>
       {gameState === "win" && <h2>YOU WIN!</h2>}
-      <button className="mt-[10px]" onClick={checkAnswer}>
+      {gameState === "lose" && <h2>YOU LOSE!</h2>}
+      <button
+        className="mt-[10px]"
+        onClick={checkAnswer}
+        disabled={gameState === "win" || gameState === "lose"}
+      >
         Enter
       </button>
 
