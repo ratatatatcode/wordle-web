@@ -23,7 +23,7 @@ function App() {
     ["empty", "empty", "empty", "empty", "empty", "unchecked"],
   ]);
 
-  useEffect(() => {
+  /*   useEffect(() => {
     try {
       const fetchWord = async () => {
         const response = await fetch(apiURL);
@@ -36,7 +36,7 @@ function App() {
     } catch (err) {
       console.log(`Fetch error: ${err}`);
     }
-  }, []);
+  }, []); */
 
   const checkAnswer = () => {
     const newBoxes = [...boxes];
@@ -64,7 +64,10 @@ function App() {
       console.log("Working: Win");
       setTryCount(0);
       setGameState("win");
-      // Update: return(?), update arr status (green display)
+      updateRow[5] = "checked";
+      newBoxes[rowToCheckRef.current] = updateRow;
+      setBoxes(newBoxes);
+      return;
     }
 
     console.log(`Try Count (outside): ${tryCount}`);
@@ -73,6 +76,7 @@ function App() {
       console.log("Working: Lose");
       setTryCount(0);
       setGameState("lose");
+      return;
     }
 
     if (gameState !== "win" && gameState !== "lose") {
